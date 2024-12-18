@@ -24,7 +24,7 @@ class UserPointDomainTest {
 	}
 
 	@Test
-	void fail_no_point_to_charge() {
+	void fail_charge_zero_point() {
 		//given
 		UserPoint userPoint = new UserPoint(1L, 0L, System.currentTimeMillis());
 		UserPointDomain userPointDomain = new UserPointDomain(userPoint);
@@ -39,7 +39,7 @@ class UserPointDomainTest {
 	}
 
 	@Test
-	void fail_charge_exceeds_max_balance() {
+	void fail_charge_point_exceeds_limit() {
 		//given
 		UserPoint userPoint = new UserPoint(1L, 900_000L, System.currentTimeMillis());
 		UserPointDomain userPointDomain = new UserPointDomain(userPoint);
@@ -68,7 +68,7 @@ class UserPointDomainTest {
 	}
 
 	@Test
-	void fail_no_point_to_use() {
+	void fail_use_zero_point() {
 		//given
 		UserPoint userPoint = new UserPoint(1L, 300_000L, System.currentTimeMillis());
 		UserPointDomain userPointDomain = new UserPointDomain(userPoint);
@@ -83,7 +83,7 @@ class UserPointDomainTest {
 	}
 
 	@Test
-	void fail_not_enough_balance_to_use() {
+	void fail_use_point_insufficient() {
 		//given
 		UserPoint userPoint = new UserPoint(1L, 100_000L, System.currentTimeMillis());
 		UserPointDomain userPointDomain = new UserPointDomain(userPoint);
@@ -99,7 +99,7 @@ class UserPointDomainTest {
 	}
 
 	@Test
-	void fail_improper_point_to_use() {
+	void fail_use_point_improper() {
 		//given
 		UserPoint userPoint = new UserPoint(1L, 100_000L, System.currentTimeMillis());
 		UserPointDomain userPointDomain = new UserPointDomain(userPoint);

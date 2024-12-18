@@ -8,7 +8,7 @@ import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.PointHistory;
 import io.hhplus.tdd.point.UserPoint;
 import io.hhplus.tdd.point.domain.TransactionType;
-import io.hhplus.tdd.point.service.PointService;
+import io.hhplus.tdd.point.service.LockPointService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 class PointServiceTest {
 
 	@Autowired
-	private PointService pointService;
+	private LockPointService pointService;
 
 	@Autowired
 	private UserPointTable userPointTable;
