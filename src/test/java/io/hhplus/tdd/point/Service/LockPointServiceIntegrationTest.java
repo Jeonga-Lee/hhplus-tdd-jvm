@@ -122,6 +122,4 @@ class LockPointServiceIntegrationTest {
 		UserPoint finalUserPoint = userPointTable.selectById(userId);
 		assertThat(finalUserPoint.point()).isEqualTo(0L);
 	}
-
-
 }
