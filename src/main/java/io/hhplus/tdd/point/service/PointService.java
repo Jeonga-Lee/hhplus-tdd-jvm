@@ -1,11 +1,16 @@
 package io.hhplus.tdd.point.service;
 
+import io.hhplus.tdd.point.PointHistory;
 import io.hhplus.tdd.point.UserPoint;
+import java.util.List;
 
-interface PointService {
+public interface PointService {
 
-	// TODO: facade pattern 변경하여 point history 분리할 것
+	UserPoint getUserPoint(long userId);
+
 	UserPoint charge(long userId, long chargeAmount);
 
 	UserPoint use(long userId, long amount);
+
+	List<PointHistory> selectAllByUserId(long id);
 }

@@ -10,12 +10,15 @@ import io.hhplus.tdd.point.UserPoint;
 import io.hhplus.tdd.point.domain.TransactionType;
 import io.hhplus.tdd.point.service.LockPointService;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class PointServiceTest {
+class LockPointServiceIntegrationTest {
 
 	@Autowired
 	private LockPointService pointService;
@@ -27,7 +30,7 @@ class PointServiceTest {
 	private PointHistoryTable pointHistoryTable;
 
 	@Test
-	void success_charge_point() {
+	void success_leave_history_when_charge_point() {
 		// given
 		long userId = 1L;
 		long initialAmount = 0L;
@@ -36,19 +39,18 @@ class PointServiceTest {
 		userPointTable.insertOrUpdate(userId, initialAmount);
 
 		// when
-		UserPoint updatedUserPoint = pointService.charge(userId, chargeAmount);
+		pointService.charge(userId, chargeAmount);
+		pointService.charge(userId, chargeAmount);
 
 		// then
-		assertThat(updatedUserPoint.point()).isEqualTo(1000L);
-
 		List<PointHistory> history = pointHistoryTable.selectAllByUserId(userId);
-		assertThat(history).hasSize(1);
-		assertThat(history.get(0).type()).isEqualTo(TransactionType.CHARGE);
-		assertThat(history.get(0).amount()).isEqualTo(chargeAmount);
+		assertThat(history).hasSize(2);
+		assertThat(history.get(1).type()).isEqualTo(TransactionType.CHARGE);
+		assertThat(history.get(1).amount()).isEqualTo(chargeAmount);
 	}
 
 	@Test
-	void success_use_point() {
+	void success_leave_history_when_use_point() {
 		// given
 		long userId = 2L;
 		long initialAmount = 2000L;
@@ -57,11 +59,9 @@ class PointServiceTest {
 		userPointTable.insertOrUpdate(userId, initialAmount);
 
 		// when
-		UserPoint updatedUserPoint = pointService.use(userId, useAmount);
+		pointService.use(userId, useAmount);
 
 		// then
-		assertThat(updatedUserPoint.point()).isEqualTo(1000L);
-
 		List<PointHistory> history = pointHistoryTable.selectAllByUserId(userId);
 		assertThat(history).hasSize(1);
 		assertThat(history.get(0).type()).isEqualTo(TransactionType.USE);
@@ -75,7 +75,6 @@ class PointServiceTest {
 		long initialAmount = 999_000L;
 		long chargeAmount = 2000L;
 
-		// 초기 데이터 설정 (UserPoint)
 		userPointTable.insertOrUpdate(userId, initialAmount);
 
 		// when & then
@@ -91,13 +90,38 @@ class PointServiceTest {
 		long initialAmount = 500L;
 		long useAmount = 1000L;
 
-		// 초기 데이터 설정 (UserPoint)
 		userPointTable.insertOrUpdate(userId, initialAmount);
 
 		// when & then
 		assertThatThrownBy(() -> pointService.use(userId, useAmount))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining(
-				"포인트가 부족합니다." + initialAmount + "포인트 사용 가능합니다.");
+				"포인트가 부족합니다. 현재 " + initialAmount + "포인트 보유 중 입니다.");
 	}
+
+
+	@DisplayName("같은 유저에 대해 포인트 충전과 사용이 순차적으로 수행된다.")
+	@Test
+	void success_singleUser_syncProcessing() {
+		// given
+		long userId = 5L;
+		long amount = 1000L;
+
+		// when
+		ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+		for (int i = 0; i < 1000; i++) {
+			executorService.submit(() -> {
+				pointService.charge(userId, amount);
+				pointService.use(userId, amount);
+			});
+		}
+
+		// then
+		executorService.shutdown();
+		UserPoint finalUserPoint = userPointTable.selectById(userId);
+		assertThat(finalUserPoint.point()).isEqualTo(0L);
+	}
+
+
 }
