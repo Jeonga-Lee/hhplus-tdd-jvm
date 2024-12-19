@@ -156,6 +156,4 @@ class LockPointServiceTest {
 		//then
 		assertThat(savedUserPoint.point()).isEqualTo(2000L);
 	}
-
-
 }

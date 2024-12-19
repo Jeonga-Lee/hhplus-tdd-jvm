@@ -14,3 +14,4 @@ public interface PointService {
 
 	List<PointHistory> selectAllByUserId(long id);
 }
+

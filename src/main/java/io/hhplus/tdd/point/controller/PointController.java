@@ -53,3 +53,4 @@ public class PointController {
 		return pointService.use(id, amount);
 	}
 }
+
